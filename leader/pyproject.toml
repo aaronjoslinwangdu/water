@@ -1,0 +1,5 @@
+[project]
+name = "water-leader"
+version = "0.1.0"
+description = "Leader node for the water application"
+readme = "README.md"

@@ -1,0 +1,16 @@
+[project]
+name = "water-node"
+version = "0.1.0"
+description = "Edge node for the water application"
+readme = "README.md"
+
+[tool.uv]
+package = false
+
+[dependency-groups]
+dev = [
+    "micropython-esp32-stubs>=1.29.0.post1",
+    "micropython-stdlib-stubs>=1.29.0.post2",
+    "mpremote>=1.29.0",
+]
+
