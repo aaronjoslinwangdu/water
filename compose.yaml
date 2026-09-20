@@ -1,0 +1,23 @@
+services:
+  leader:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8000}:80"
+    environment:
+      - MQTT_HOST=${MQTT_HOST}
+      - MQTT_PORT=${MQTT_PORT}
+      - MQTT_TOPIC=${MQTT_TOPIC}
+
+  mosquitto:
+    image: eclipse-mosquitto:2.1.2-alpine
+    restart: unless-stopped
+    ports:
+      - "${MQTT_PORT:-1883}:1883"
+    volumes:
+      - ./mosquitto/config:/mosquitto/config:ro
+      - mosquitto-data:/mosquitto/data
+
+volumes:
+  mosquitto-data:
+

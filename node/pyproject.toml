@@ -1,5 +1,5 @@
 [project]
-name = "water-node"
+name = "node"
 version = "0.1.0"
 description = "Edge node for the water application"
 readme = "README.md"

@@ -1,5 +1,10 @@
 [project]
-name = "water-leader"
+name = "leader"
 version = "0.1.0"
 description = "Leader node for the water application"
 readme = "README.md"
+dependencies = [
+    "aiomqtt>=2.5.1",
+    "fastapi[standard-no-fastapi-cloud-cli]>=0.141.1",
+    "pydantic-settings>=2.15.0",
+]
