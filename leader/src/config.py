@@ -4,11 +4,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(extra="ignore")
 
-    MQTT_HOST: str = "mosquitto"
-    MQTT_PORT: int = 1883
-    MQTT_TOPIC: str = "water"
+    MQTT_HOST: str
+    MQTT_PORT: int
+    MQTT_TOPIC: str
 
 
 @lru_cache

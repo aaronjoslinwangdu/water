@@ -1,4 +1,6 @@
 import binascii
+import json
+from datetime import datetime
 
 import machine
 
@@ -12,22 +14,31 @@ with open(".env", "r") as file:
         key, val = line.split("=", 1)
         env[key] = val.strip()
 
+id = binascii.hexlify(machine.unique_id())
+base_topic = env.get("MQTT_TOPIC", "water")
+state_topic = f"{base_topic}/state".encode()
+cmd_topic = f"{base_topic}/{id}/cmd".encode()
+
 
 def handle_message(topic_encoded: bytes, msg_encoded: bytes) -> None:
     topic = topic_encoded.decode()
-    msg = msg_encoded.decode()
-    print(f"topic: {topic}, msg: {msg}")
+    msg = json.loads(msg_encoded.decode())
+    print(f"{datetime.now()} - Consumed on '{topic}': {msg}")
 
 
 client = simple.MQTTClient(
-    client_id=binascii.hexlify(machine.unique_id()),
+    client_id=id,
     server=env.get("MQTT_HOST"),
-    port=int(env.get("MQTT_PORT", "1833")),
+    port=int(env.get("MQTT_PORT", "1883")),
 )
 
+client.set_last_will(
+    topic=state_topic, msg=json.dumps({"type": "dead", "client_id": id})
+)
 client.set_callback(handle_message)
 client.connect()
-client.subscribe(env.get("MQTT_TOPIC", "water").encode())
+client.subscribe(cmd_topic)
+client.publish(topic=state_topic, msg=json.dumps({"type": "alive", "client_id": id}))
 
 while True:
     client.wait_msg()
