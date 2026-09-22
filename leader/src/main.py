@@ -1,5 +1,4 @@
 import asyncio
-import json
 from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Annotated
@@ -14,12 +13,14 @@ from events import Event, StateEvent
 async def update_state(client: aiomqtt.Client, connected: set[str]) -> None:
     async for msg in client.messages:
         payload = msg.payload.decode()
-        event = StateEvent.model_validate_json(json.loads(payload))
+        event = StateEvent.model_validate_json(payload)
         match event.type:
             case "alive":
                 connected.add(event.client_id)
+                print(f"{datetime.now()} - Client connected '{event.client_id}'")
             case "dead":
                 connected.discard(event.client_id)
+                print(f"{datetime.now()} - Client disconnected '{event.client_id}'")
 
 
 @asynccontextmanager
@@ -55,7 +56,11 @@ async def publish(
     settings: Annotated[Settings, Depends(get_settings)],
     event: Event,
 ):
-    payload = json.dumps(event.model_dump_json())
+    payload = event.model_dump_json()
     topic = f"{settings.MQTT_TOPIC}/{event.client_id}/cmd"
     print(f"{datetime.now()} - Publishing to topic '{topic}': '{payload}'")
     await client.publish(topic=topic, payload=payload)
+
+@app.get("/clients")
+async def list_clients(request: Request) -> list[str]:
+    return list(request.app.state.connected)

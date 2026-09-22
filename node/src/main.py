@@ -1,6 +1,6 @@
 import binascii
 import json
-from datetime import datetime
+import time
 
 import machine
 
@@ -17,13 +17,13 @@ with open(".env", "r") as file:
 id = binascii.hexlify(machine.unique_id())
 base_topic = env.get("MQTT_TOPIC", "water")
 state_topic = f"{base_topic}/state".encode()
-cmd_topic = f"{base_topic}/{id}/cmd".encode()
+cmd_topic = f"{base_topic}/{id.decode()}/cmd".encode()
 
 
 def handle_message(topic_encoded: bytes, msg_encoded: bytes) -> None:
     topic = topic_encoded.decode()
     msg = json.loads(msg_encoded.decode())
-    print(f"{datetime.now()} - Consumed on '{topic}': {msg}")
+    print(f"{time.time()} - Consumed on '{topic}': {msg}")
 
 
 client = simple.MQTTClient(
@@ -33,12 +33,12 @@ client = simple.MQTTClient(
 )
 
 client.set_last_will(
-    topic=state_topic, msg=json.dumps({"type": "dead", "client_id": id})
+    topic=state_topic, msg=json.dumps({"type": "dead", "client_id": id.decode()})
 )
 client.set_callback(handle_message)
 client.connect()
 client.subscribe(cmd_topic)
-client.publish(topic=state_topic, msg=json.dumps({"type": "alive", "client_id": id}))
+client.publish(topic=state_topic, msg=json.dumps({"type": "alive", "client_id": id.decode()}))
 
 while True:
     client.wait_msg()
